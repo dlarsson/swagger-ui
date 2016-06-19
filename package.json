@@ -19,7 +19,7 @@
     "jshint": "jshint .",
     "pretest": "npm run jshint",
     "test": "mocha",
-    "rpmbuild": "gulp rpmbuild"
+    "rpmbuild": "gulp rpm"
   },
   "repository": {
     "type": "git",
