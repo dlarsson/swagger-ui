@@ -1,6 +1,7 @@
 'use strict';
 
 var gulp = require('gulp');
+var path = require('path');
 var es = require('event-stream');
 var clean = require('gulp-clean');
 var concat = require('gulp-concat');
@@ -18,6 +19,7 @@ var jshint = require('gulp-jshint');
 var brass = require('gulp-brass');
 var npm = require('gulp-brass-npm');
 var pkg = require('./package.json');
+var runSequence = require('run-sequence');
 
 var banner = ['/**',
   ' * <%= pkg.name %> - <%= pkg.description %>',
@@ -146,12 +148,12 @@ function _rpmclean() {
 
 gulp.task('setup', [ 'rpmclean' ], rpm.setupTask());
 gulp.task('source', [ 'setup' ], npm.sourceTask(pkg, rpm));
-gulp.task('files', [ 'setup', 'dist', 'copy' ], function () {
+gulp.task('files', [ 'setup' ], function () {
   var globs = [
-    'dist/**/*'
+    '**/*'
   ];
 
-  return gulp.src(globs, rpm.globOptions)
+  return gulp.src(globs, {cwd:'dist', base:'dist', mark:true})
   .pipe(gulp.dest(path.join(rpm.buildRoot, options.installDir)))
   .pipe(brass.util.stream(function (file, done) {
     done(null, file);
@@ -194,4 +196,7 @@ gulp.task('default', ['dist', 'copy']);
 gulp.task('serve', ['connect', 'watch']);
 gulp.task('dev', ['default'], function () {
   gulp.start('serve');
+});
+gulp.task('rpm', function(done) {
+  runSequence('dist', 'rpmbuild', done);
 });
