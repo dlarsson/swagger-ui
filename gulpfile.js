@@ -198,5 +198,5 @@ gulp.task('dev', ['default'], function () {
   gulp.start('serve');
 });
 gulp.task('rpm', function(done) {
-  runSequence('dist', 'rpmbuild', done);
+  runSequence('default', 'rpmbuild', done);
 });
