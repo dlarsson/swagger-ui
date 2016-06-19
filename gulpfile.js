@@ -15,6 +15,7 @@ var connect = require('gulp-connect');
 var header = require('gulp-header');
 var order = require('gulp-order');
 var jshint = require('gulp-jshint');
+var brass = require('gulp-brass');
 var pkg = require('./package.json');
 
 var banner = ['/**',
@@ -24,6 +25,10 @@ var banner = ['/**',
   ' * @license <%= pkg.license %>',
   ' */',
   ''].join('\n');
+
+var options = npm.getOptions(pkg);
+options.installDir = '/var/www/'+ options.name;
+rpm = brass.create(options);
 
 /**
  * Clean ups ./dist folder
@@ -129,6 +134,32 @@ gulp.task('copy-local-specs', function () {
     .pipe(gulp.dest('./dist/specs'))
     .on('error', log);
 });
+
+gulp.task('rpmclean', [ 'clean' ], _rpmclean);
+function _rpmclean() {
+  return gulp
+    .src([ rpm.buildDir ], { read: false })
+    .pipe(clean({force: true}))
+    .on('error', log);
+}
+
+gulp.task('setup', [ 'clean' ], rpm.setupTask());
+gulp.task('source', [ 'setup' ], npm.sourceTask(pkg, rpm));
+gulp.task('files', [ 'setup', 'dist', 'copy', 'source' ], function () {
+  var globs = [
+    'dist/**/*'
+  ];
+
+  return gulp.src(globs, rpm.globOptions)
+  .pipe(gulp.dest(path.join(rpm.buildRoot, options.installDir)))
+  .pipe(brass.util.stream(function (file, done) {
+    done(null, file);
+  }))
+  .pipe(rpm.files());
+});
+
+gulp.task('spec', [ 'files' ], rpm.specTask());
+gulp.task('rpmbuild', [ 'spec' ], rpm.buildTask());
 
 /**
  * Watch for changes and recompile
