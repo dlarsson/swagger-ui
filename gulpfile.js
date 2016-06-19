@@ -16,6 +16,7 @@ var header = require('gulp-header');
 var order = require('gulp-order');
 var jshint = require('gulp-jshint');
 var brass = require('gulp-brass');
+var npm = require('gulp-brass-npm');
 var pkg = require('./package.json');
 
 var banner = ['/**',
@@ -28,7 +29,7 @@ var banner = ['/**',
 
 var options = npm.getOptions(pkg);
 options.installDir = '/var/www/'+ options.name;
-rpm = brass.create(options);
+var rpm = brass.create(options);
 
 /**
  * Clean ups ./dist folder
@@ -135,7 +136,7 @@ gulp.task('copy-local-specs', function () {
     .on('error', log);
 });
 
-gulp.task('rpmclean', [ 'clean' ], _rpmclean);
+gulp.task('rpmclean', _rpmclean);
 function _rpmclean() {
   return gulp
     .src([ rpm.buildDir ], { read: false })
@@ -143,9 +144,9 @@ function _rpmclean() {
     .on('error', log);
 }
 
-gulp.task('setup', [ 'clean' ], rpm.setupTask());
+gulp.task('setup', [ 'rpmclean' ], rpm.setupTask());
 gulp.task('source', [ 'setup' ], npm.sourceTask(pkg, rpm));
-gulp.task('files', [ 'setup', 'dist', 'copy', 'source' ], function () {
+gulp.task('files', [ 'setup', 'dist', 'copy' ], function () {
   var globs = [
     'dist/**/*'
   ];
