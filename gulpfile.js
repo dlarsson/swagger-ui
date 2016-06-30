@@ -165,7 +165,7 @@ function _rpmclean() {
 
 gulp.task('setup', [ 'rpmclean' ], rpm.setupTask());
 gulp.task('source', [ 'setup' ], npm.sourceTask(pkg, rpm));
-gulp.task('files', [ 'setup' ], function () {
+gulp.task('files', [ 'source' ], function () {
   var globs = [
     '**/*'
   ];
