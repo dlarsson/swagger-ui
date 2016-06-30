@@ -19,9 +19,11 @@ var order = require('gulp-order');
 var jshint = require('gulp-jshint');
 var brass = require('gulp-brass');
 var npm = require('gulp-brass-npm');
+var clean = require('gulp-clean')
 var pkg = require('./package.json');
 var runSequence = require('run-sequence');
 var pandoc = require('gulp-pandoc');
+var del = require('del')
 
 var banner = ['/**',
   ' * <%= pkg.name %> - <%= pkg.description %>',
@@ -54,7 +56,7 @@ gulp.task('lint', function () {
 /**
  * Build a distribution
  */
-gulp.task('dist', ['clean', 'docs', 'lint'], _dist);
+gulp.task('dist', ['clean', 'lint'], _dist);
 function _dist() {
   return es.merge(
     gulp.src([
@@ -107,7 +109,7 @@ gulp.task('dev-less', _less);
 /**
  * Copy lib and html folders
  */
-gulp.task('copy', ['less'], _copy);
+gulp.task('copy', ['less', 'docs'], _copy);
 function _copy() {
   // copy JavaScript files inside lib folder
   gulp
@@ -129,7 +131,7 @@ function _copy() {
 }
 gulp.task('dev-copy', ['dev-less', 'copy-local-specs'], _copy);
 
-gulp.task('docs', ['clean'], function() {
+gulp.task('docs', ['dist'], function() {
   gulp.src('src/api-info/*.md')
     .pipe(pandoc({
       from: 'markdown',

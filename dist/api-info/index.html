@@ -173,10 +173,10 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
     },
     ...
 ]</code></pre>
-<p><code>GET</code>on a collection resource returns, as you might imagine, a collection of resources. They return a subset of the available resources, controlled by the query parameters <code>limit</code> (default 25) and <code>offset</code> (default 0). The response contains the headers <code>X-Collection-Limit</code>, <code>X-Collection-Offset</code> and <code>X-Collection-Total</code>, which tells you what part of the total collection you’re getting, and how big it is. Note that <code>X-Collection-Limit</code> may refer past the available resources, as in the example below. It simply reflects the value of the <code>limit</code> parameter passed in (or the default value, as here).</p>
+<p><strong><code>GET</code></strong> on a collection resource returns, as you might imagine, a collection of resources. They return a subset of the available resources, controlled by the query parameters <code>limit</code> (default 25) and <code>offset</code> (default 0). The response contains the headers <code>X-Collection-Limit</code>, <code>X-Collection-Offset</code> and <code>X-Collection-Total</code>, which tells you what part of the total collection you’re getting, and how big it is. Note that <code>X-Collection-Limit</code> may refer past the available resources, as in the example below. It simply reflects the value of the <code>limit</code> parameter passed in (or the default value, as here).</p>
 <p>The <code>Link</code> headers link to other <em>pages</em> within the collection. Again, the <code>rel</code> attribute identifies the type of the link. Possible <code>rel</code> values here are <code>self</code> (the URL for this subcollection), <code>first</code> (the first <em>page</em> of the collection), <code>last</code>, <code>next</code> and <code>previous</code>.</p>
 <p>All collection resources have a <code>fields</code> subresource, which returns a JSON object with a single member <code>fields</code>, an array of all valid fields for that resource type. Some of these fields are default fields, while others have to be explicitly requested in order to be returned.</p>
-<p>Resources are typically hierarchically organized. At the root there are organizations, and underneath there are resources like users, PTT groups, user categories, queues, panic alarms, etc. When requesting a collection, or an instance of a subresource, you can optionally request for parent fields, as indicated by the list returned from <code>GET</code>-ing the <code>fields</code>subresource:</p>
+<p>Resources are typically hierarchically organized. At the root there are organizations, and underneath there are resources like users, PTT groups, user categories, queues, panic alarms, etc. When requesting a collection, or an instance of a subresource, you can optionally request for parent fields, as indicated by the list returned from <code>GET</code>-ing the <code>fields</code> subresource:</p>
 <pre><code>$ curl -v -HAccept:application/json &#39;https://42:&lt;apikey&gt;@admin.grouptalk.com/api/organizations/42/users/fields/&#39;
 ...
 &lt; HTTP/1.1 200 OK
@@ -236,6 +236,32 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
 ]
 }</code></pre>
 <p>Above are all the valid fields for the user resource. Fields prefixed with <code>organizations!</code> are fields belonging to the user’s organization, and none of those are returned by default. To specify what fields to include in the response, use the <code>field</code> <a href="#matrix-parameters">matrix parameter</a></p>
+<pre><code>$ curl -v -HAccept:application/json &#39;https://42:&lt;apikey&gt;@admin.grouptalk.com/api/organizations/42/users;field=uri;field=firstName;field=lastName;field=organizations!name/&#39;
+...
+&lt; HTTP/1.1 200 OK
+&lt; Server: GlassFish Server Open Source Edition  4.1.1
+&lt; X-Powered-By: Servlet/3.1 JSP/2.3 (GlassFish Server Open Source Edition  4.1.1  Java/Oracle Corporation/1.8)
+&lt; X-Collection-Limit: 25
+&lt; X-Collection-Offset: 0
+&lt; X-Collection-Total: 8
+&lt; Link: &lt;http://localhost:8080/api/organizations/20/users;field=firstName;field=lastName;field=organizations!name/?offset=0&amp;limit=25&gt;; rel=&quot;self&quot;
+&lt; Link: &lt;http://localhost:8080/api/organizations/20/users;field=firstName;field=lastName;field=organizations!name/?offset=0&amp;limit=25&gt;; rel=&quot;first&quot;
+&lt; Link: &lt;http://localhost:8080/api/organizations/20/users;field=firstName;field=lastName;field=organizations!name/?offset=0&amp;limit=25&gt;; rel=&quot;last&quot;
+&lt; Content-Type: application/json
+&lt; Date: Thu, 30 Jun 2016 09:04:29 GMT
+&lt; Content-Length: 611
+&lt;
+{ [611 bytes data]
+100   611  100   611    0     0   2193      0 --:--:-- --:--:-- --:--:--  2189
+* Connection #0 to host localhost left intact
+[
+    {
+        &quot;lastName&quot;: &quot;Doe&quot;,
+        &quot;firstName&quot;: &quot;John&quot;,
+        &quot;organizations!name&quot;: &quot;A company&quot;
+    },
+    ...
+]</code></pre>
 <h2 id="matrix-parameters">Matrix parameters</h2>
 <p>Matrix parameters are parameters that may be applied to a path segment in the URL, as opposed to query parameters, which applies to the whole URL. They are typically used to filter/influence the result of a <code>GET</code> request. Some examples:</p>
 <dl>
