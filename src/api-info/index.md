@@ -1,18 +1,18 @@
-# Grouptalk Admin API tutorial
+# GroupTalk Admin API tutorial
 
 ## Preparations
 
-The Grouptalk Admin REST API provides a programmatic interface to manage your
+The GroupTalk Admin REST API provides a programmatic interface to manage your
 organization. To use the REST API, you first need to acquire an API key.
-Contact [Grouptalk Support](mailto:support@grouptalk.com) to get one. Secondly,
+Contact [GroupTalk Support](mailto:support@grouptalk.com) to get one. Secondly,
 you need to find out your organization's URL. This is easiest done by logging in
-to your [Grouptalk Web Admin account](https://admin.grouptalk.com/admin/), click
+to your [GroupTalk Web Admin account](https://admin.grouptalk.com/admin/), click
 the organization menu item (underneath your name in the menu to the left), and
 look at what the URL in the address bar says. It should say something like
 <https://admin.grouptalk.com/admin/#/organizations/42/>. That last number is the
-Grouptalk identity number for your organization, and the API url for your
-organization is <https://admin.group.com/api/organizations/42/> (with '42' replaced
-with whatever your organization's identity number is).
+GroupTalk identity number for your organization, and the API url for your
+organization is <https://admin.grouptalk.com/api/organizations/42/> (with '42'
+replaced with whatever your organization's identity number is).
 
 ## Trying things out
 
@@ -306,12 +306,95 @@ use the `field` [matrix parameter](#matrix-parameters)
     [
         {
             "lastName": "Doe",
+            "uri": "/api/organizations/users/15439/",
             "firstName": "John",
             "organizations!name": "A company"
         },
         ...
     ]
 
+### Relation resources
+
+Relation resources are a special kind of collection resources, and represents a
+relation between a resource and a set of other resources. An example is the
+roles associated with a user category.
+
+**NOTE**: `access-groups` in the URL below will be replaced with `user-categories`
+in the next release of the GroupTalk admin API!
+
+    $ curl -v -HAccept:application/json 'http://42:<apikey>@admin.grouptalk.com/api/organizations/access-groups/22/roles/' | aeson-pretty
+    ...
+    < HTTP/1.1 200 OK
+    < X-Collection-Limit: 25
+    < X-Collection-Offset: 0
+    < X-Collection-Total: 1
+    < Link: <http://localhost:8080/api/organizations/access-groups/22/roles/?offset=0&limit=25>; rel="self"
+    < Link: <http://localhost:8080/api/organizations/access-groups/22/roles/?offset=0&limit=25>; rel="first"
+    < Link: <http://localhost:8080/api/organizations/access-groups/22/roles/?offset=0&limit=25>; rel="last"
+    < Content-Type: application/json
+    < Date: Thu, 30 Jun 2016 09:17:26 GMT
+    < Content-Length: 173
+    <
+    { [173 bytes data]
+    100   173  100   173    0     0   1891      0 --:--:-- --:--:-- --:--:--  1901
+    * Connection #0 to host localhost left intact
+    [
+        {
+            "uri": "/api/organizations/access-groups/22/roles/privatecall",
+            "childUri": "/api/roles/privatecall",
+            "name": "privatecall",
+            "parentUri": "/api/organizations/access-groups/22/"
+        },
+        {
+            "uri": "/api/organizations/access-groups/22/roles/reader",
+            "childUri": "/api/roles/reader",
+            "name": "reader",
+            "parentUri": "/api/organizations/access-groups/22/"
+        },
+        ...
+    ]
+
+The role relation has it's own URL: `/api/organizations/access-groups/22/roles/reader`.
+The returned data refers to the user category it belongs to in the `parentUri`
+field, and what role it represents through the `childUri` field.
+
+To add a new role to the user category, we `POST`
+
+ To remove this
+role you send a `DELETE` to the relation URL:
+
+    $ curl -v -XDELETE 'http://42:<apikey>@admin.grouptalk.com/api/organizations/access-groups/22/roles/reader'
+
+### Supported instance resource methods
+
+All instance resources, regardless of type, has an `uri` field, through which you can
+interact with the resource. It may support the following HTTP methods (consult
+the API reference for details):
+
+`GET`
+:   Get a representation of the resource.
+
+`PUT`
+:   Replace the representation with the data sent in the request body.
+
+`PATCH`
+:   Replace individual fields on the resource, e.g. the name.
+
+`DELETE`
+:   Remove this resource.
+
+### Supported collection resource methods
+
+Collection resources may support the following HTTP methods:
+
+`GET`
+:   Get a representation of the resource.
+
+`POST`
+:   Create a new instance resource in this collection
+
+`PUT`
+:   Replace the collection with the given list of resources
 
 ## Matrix parameters
 
