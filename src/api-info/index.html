@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+<body>
+<div id="TOC">
+<ul>
+<li><a href="#grouptalk-admin-api-tutorial">Grouptalk Admin API tutorial</a><ul>
+<li><a href="#preparations">Preparations</a></li>
+<li><a href="#trying-things-out">Trying things out</a><ul>
+<li><a href="#collection-resources">Collection resources</a></li>
+</ul></li>
+<li><a href="#matrix-parameters">Matrix parameters</a><ul>
+<li><a href="#common-matrix-parameters-for-collections">Common matrix parameters for Collections</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+<h1 id="grouptalk-admin-api-tutorial">Grouptalk Admin API tutorial</h1>
+<h2 id="preparations">Preparations</h2>
+<p>The Grouptalk Admin REST API provides a programmatic interface to manage your organization. To use the REST API, you first need to acquire an API key. Contact <script type="text/javascript">
+<!--
+h='&#x67;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#46;&#x63;&#x6f;&#x6d;';a='&#64;';n='&#x73;&#x75;&#112;&#112;&#x6f;&#114;&#116;';e=n+a+h;
+document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x47;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#32;&#x53;&#x75;&#112;&#112;&#x6f;&#114;&#116;'+'<\/'+'a'+'>');
+// -->
+</script><noscript>&#x47;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#32;&#x53;&#x75;&#112;&#112;&#x6f;&#114;&#116;&#32;&#40;&#x73;&#x75;&#112;&#112;&#x6f;&#114;&#116;&#32;&#x61;&#116;&#32;&#x67;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#32;&#100;&#x6f;&#116;&#32;&#x63;&#x6f;&#x6d;&#x29;</noscript> to get one. Secondly, you need to find out your organization's URL. This is easiest done by logging in to your <a href="https://admin.grouptalk.com/admin/">Grouptalk Web Admin account</a>, click the organization menu item (underneath your name in the menu to the left), and look at what the URL in the address bar says. It should say something like https://admin.grouptalk.com/admin/#/organizations/42/. That last number is the Grouptalk identity number for your organization, and the API url for your organization is <a href="https://admin.group.com/api/organizations/42/" class="uri">https://admin.group.com/api/organizations/42/</a> (with '42' replaced with whatever your organization's identity number is).</p>
+<h2 id="trying-things-out">Trying things out</h2>
+<p>Now that you have an API key, and know your organization's identity number, you can start exploring the API. Type in the following URL in your web browser:</p>
+<pre><code>https://42:&lt;api-key&gt;@admin.grouptalk.com/api/authenticated-principal.json/</code></pre>
+<p>Alternatively, you can use a tool like <code>curl</code> to try out the API. We're using <code>curl</code> below to illustrate the output of typical API requests. You might want to use a JSON pretty printer to make the output a bit more human readable.</p>
+<pre><code>$ curl -v -HAccept:application/json &#39;https://42:&lt;api-key&gt;@admin.grouptalk.com/api/authenticated-principal/&#39;
+...
+&lt; HTTP/1.1 200 OK
+&lt; Content-Type: application/json
+&lt; Date: Tue, 28 Jun 2016 16:13:47 GMT
+&lt; Content-Length: 171
+&lt;
+{ [171 bytes data]
+100   171  100   171    0     0   4267      0 --:--:-- --:--:-- --:--:--  4384
+* Connection #0 to host localhost left intact
+{
+    &quot;organizationName&quot;: &quot;Example&quot;,
+    &quot;userUri&quot;: null,
+    &quot;currentRoles&quot;: [
+        {
+            &quot;uri&quot;: &quot;/api/roles/admin&quot;,
+            &quot;name&quot;: &quot;admin&quot;
+        }
+    ],
+    &quot;displayName&quot;: &quot;Example&quot;,
+    &quot;organizationUri&quot;: &quot;/api/organizations/42/&quot;
+}</code></pre>
+<p>This URL returns information about the authenticated <em>principal</em>. Since an API key isn't associated with a particular user, <code>userUri</code> is null, and <code>displayName</code> contains the same as <code>organizationName</code>. More interestingly, there is an <code>organizationUri</code> field, with a URL to your organization. This URL is relative to the base URL, which is <a href="https://42:%3Capi-key" class="uri">https://42:&lt;api-key</a><span class="citation">@admin.grouptalk.com</span>&gt;. When following links, always resolve them against this base URL.</p>
+<p>Following the <code>organizationUri</code> link, we get the following result:</p>
+<pre><code>$ curl -v -HAccept:application/json https://42:&lt;api-key&gt;@admin.grouptalk.com/api/organizations/42/
+...
+&lt; HTTP/1.1 200 OK
+&lt; Link: &lt;/api/organizations/42/user-categories/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/user-categories&quot;
+&lt; Link: &lt;/api/organizations/42/default-user-categories/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/default-user-categories&quot;
+&lt; Link: &lt;/api/organizations/42/default-ptt-group-categories/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/default-ptt-group-categories&quot;
+&lt; Link: &lt;/api/organizations/42/users/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/users&quot;
+&lt; Link: &lt;/api/organizations/42/ptt-groups/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/ptt-groups&quot;
+&lt; Link: &lt;/api/organizations/42/call-groups/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/call-groups&quot;
+&lt; Link: &lt;/api/organizations/42/queues/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/queues&quot;
+&lt; Link: &lt;/api/organizations/42/custom-actions/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/custom-actions&quot;
+&lt; Link: &lt;/api/organizations/42/custom-action-groups/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/custom-action-groups&quot;
+&lt; Link: &lt;/api/organizations/42/alarm-definitions/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/alarm-definitions&quot;
+&lt; Link: &lt;/api/organizations/42/links/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/links&quot;
+&lt; Link: &lt;/api/organizations/42/priceplan/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/priceplan&quot;
+&lt; Link: &lt;/api/organizations/42/licenses/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/licenses&quot;
+&lt; Link: &lt;/api/organizations/42/invoices/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/invoices&quot;
+&lt; Link: &lt;/api/organizations/42/become-customer&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/become-customer&quot;
+&lt; Link: &lt;/api/organizations/42/end-of-trial&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/endoftrial&quot;
+&lt; Link: &lt;/api/organizations/42/payment-methods&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/payment-methods&quot;
+&lt; Link: &lt;/api/organizations/42/activate&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/activate&quot;
+&lt; Link: &lt;/api/organizations/42/api-key/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/api-key&quot;
+&lt; Content-Type: application/json
+&lt; Date: Tue, 28 Jun 2016 12:20:04 GMT
+&lt; Content-Length: 1127
+&lt;
+{ [1127 bytes data]
+100  1127  100  1127    0     0   8087      0 --:--:-- --:--:-- --:--:--  8107
+* Connection #0 to host localhost left intact
+{
+    &quot;email&quot;: &quot;contact@email.org&quot;,
+    &quot;phone&quot;: null,
+    &quot;passwordValidDuration&quot;: null,
+    &quot;autoMuteWarningSeconds&quot;: 4,
+    &quot;originatingNumber&quot;: &quot;+46XXXXXXXX&quot;,
+    &quot;inTrial&quot;: false,
+    &quot;prohibitPasswordReuse&quot;: false,
+    &quot;created&quot;: &quot;2013-02-15T13:03:08.000+0000&quot;,
+    &quot;uri&quot;: &quot;/api/organizations/42/&quot;,
+    &quot;hasPaymentInfo&quot;: false,
+    &quot;expirationWarningInterval&quot;: null,
+    &quot;validUntil&quot;: null,
+    &quot;numExpirationWarnings&quot;: 0,
+    &quot;name&quot;: &quot;A company&quot;,
+    &quot;currency&quot;: &quot;SEK&quot;,
+    &quot;id&quot;: 42,
+    &quot;autoMuteSeconds&quot;: 12,
+    &quot;resellerUri&quot;: &quot;/api/organizations/resellers/1/&quot;,
+    &quot;pendingCustomer&quot;: false,
+    &quot;defaultSyncGroup&quot;: null,
+    &quot;label&quot;: {
+        &quot;conferenceLabel4&quot;: &quot;&quot;,
+        &quot;enableConferenceLabel5&quot;: false,
+        &quot;enableUserLabel1&quot;: false,
+        &quot;enableConferenceLabel3&quot;: false,
+        &quot;conferenceLabel2&quot;: &quot;&quot;,
+        &quot;enableConferenceLabel4&quot;: false,
+        &quot;conferenceLabel5&quot;: &quot;&quot;,
+        &quot;conferenceLabel3&quot;: &quot;&quot;,
+        &quot;enableConferenceLabel2&quot;: false,
+        &quot;conferencePattern&quot;: &quot;%n&quot;,
+        &quot;enableUserLabel2&quot;: false,
+        &quot;userLabel3&quot;: &quot;&quot;,
+        &quot;userLabel5&quot;: &quot;&quot;,
+        &quot;enableUserLabel4&quot;: false,
+        &quot;userLabel2&quot;: &quot;&quot;,
+        &quot;id&quot;: 20,
+        &quot;enableUserLabel3&quot;: false,
+        &quot;enableConferenceLabel1&quot;: false,
+        &quot;enableUserLabel5&quot;: false,
+        &quot;userLabel4&quot;: &quot;&quot;,
+        &quot;userLabel1&quot;: &quot;&quot;,
+        &quot;userPattern&quot;: &quot;%f %l&quot;,
+        &quot;conferenceLabel1&quot;: &quot;&quot;,
+        &quot;userTitlePattern&quot;: &quot;&quot;,
+        &quot;interfacePoolPattern&quot;: &quot;Radio %n&quot;
+    },
+    &quot;orgNumber&quot;: &quot;550000-0000&quot;
+}</code></pre>
+<p>As you can see, this returns quite a bit of data. The first part is the response headers, and notably, a bunch of <code>Link</code> headers are returned. These links refer to URLs within your organization that might be interesting, such as where to find your users, your user categories, etc. Each link has a type, identified by the <code>rel</code> attribute, and that value is an URI. The <code>rel</code> URI is not meant to be followed, it is just an URI identifying what type of information to expect from the <code>Link</code> URL.</p>
+<p>Next comes the actual JSON data returned by this request.</p>
+<h3 id="collection-resources">Collection resources</h3>
+<p>The URL <code>/organizations/42/</code> refers to an <em>instance</em>. Other URLs refer to <em>collection</em> resources. Here's an example of the response from a <code>GET</code> on a collection resource:</p>
+<pre><code>$ curl -v -HAccept:application/json &#39;https://42:&lt;apikey&gt;@admin.grouptalk.com/api/organizations/42/users/&#39;
+...
+&lt; HTTP/1.1 200 OK
+&lt; Server: GlassFish Server Open Source Edition  4.1.1
+&lt; X-Powered-By: Servlet/3.1 JSP/2.3 (GlassFish Server Open Source Edition  4.1.1  Java/Oracle Corporation/1.8)
+&lt; X-Collection-Limit: 25
+&lt; X-Collection-Offset: 0
+&lt; X-Collection-Total: 8
+&lt; Link: &lt;http://localhost:8080/api/organizations/42/users/?offset=0&amp;limit=25&gt;; rel=&quot;self&quot;
+&lt; Link: &lt;http://localhost:8080/api/organizations/42/users/?offset=0&amp;limit=25&gt;; rel=&quot;first&quot;
+&lt; Link: &lt;http://localhost:8080/api/organizations/42/users/?offset=0&amp;limit=25&gt;; rel=&quot;last&quot;
+&lt; Content-Type: application/json
+&lt; Date: Tue, 28 Jun 2016 13:05:27 GMT
+&lt; Content-Length: 3524
+&lt;
+{ [3524 bytes data]
+100  3524  100  3524    0     0  21101      0 --:--:-- --:--:-- --:--:-- 21228
+* Connection #0 to host localhost left intact
+[
+    {
+        &quot;email&quot;: &quot;user1@email.org&quot;,
+        &quot;passwordExpires&quot;: null,
+        &quot;initialMute&quot;: null,
+        &quot;hasPassword&quot;: true,
+        &quot;lastName&quot;: &quot;Doe&quot;,
+        &quot;disabled&quot;: false,
+        &quot;created&quot;: &quot;2013-02-15T13:03:08.000+0000&quot;,
+        &quot;uri&quot;: &quot;/api/organizations/users/15439/&quot;,
+        &quot;userLabel3&quot;: &quot;&quot;,
+        &quot;userLabel5&quot;: &quot;&quot;,
+        &quot;firstName&quot;: &quot;John&quot;,
+        &quot;userLabel2&quot;: &quot;&quot;,
+        &quot;organizationUri&quot;: &quot;/api/organizations/42/&quot;,
+        &quot;id&quot;: 15439,
+        &quot;deleted&quot;: null,
+        &quot;userLabel4&quot;: &quot;&quot;,
+        &quot;nextPasswordExpiresReminder&quot;: null,
+        &quot;userLabel1&quot;: &quot;&quot;,
+        &quot;loginId&quot;: &quot;john.doe&quot;
+    },
+    ...
+]</code></pre>
+<p><code>GET</code>on a collection resource returns, as you might imagine, a collection of resources. They return a subset of the available resources, controlled by the query parameters <code>limit</code> (default 25) and <code>offset</code> (default 0). The response contains the headers <code>X-Collection-Limit</code>, <code>X-Collection-Offset</code> and <code>X-Collection-Total</code>, which tells you what part of the total collection you're getting, and how big it is. Note that <code>X-Collection-Limit</code> may refer past the available resources, as in the example below. It simply reflects the value of the <code>limit</code> parameter passed in (or the default value, as here).</p>
+<p>The <code>Link</code> headers link to other <em>pages</em> within the collection. Again, the <code>rel</code> attribute identifies the type of the link. Possible <code>rel</code> values here are <code>self</code> (the URL for this subcollection), <code>first</code> (the first <em>page</em> of the collection), <code>last</code>, <code>next</code> and <code>previous</code>.</p>
+<p>All collection resources have a <code>fields</code> subresource, which returns a JSON object with a single member <code>fields</code>, an array of all valid fields for that resource type. Some of these fields are default fields, while others have to be explicitly requested in order to be returned.</p>
+<p>Resources are typically hierarchically organized. At the root there are organizations, and underneath there are resources like users, PTT groups, user categories, queues, panic alarms, etc. When requesting a collection, or an instance of a subresource, you can optionally request for parent fields, as indicated by the list returned from <code>GET</code>-ing the <code>fields</code>subresource:</p>
+<pre><code>$ curl -v -HAccept:application/json &#39;https://42:&lt;apikey&gt;@admin.grouptalk.com/api/organizations/42/users/fields/&#39;
+...
+&lt; HTTP/1.1 200 OK
+&lt; Server: GlassFish Server Open Source Edition  4.1.1
+&lt; X-Powered-By: Servlet/3.1 JSP/2.3 (GlassFish Server Open Source Edition  4.1.1  Java/Oracle Corporation/1.8)
+&lt; Content-Type: application/json
+&lt; Date: Tue, 28 Jun 2016 14:15:02 GMT
+&lt; Content-Length: 904
+&lt;
+{ [904 bytes data]
+100   904  100   904    0     0  11967      0 --:--:-- --:--:-- --:--:-- 12053
+* Connection #0 to host localhost left intact
+{
+&quot;fields&quot;: [
+    &quot;lastName&quot;,
+    &quot;loginId&quot;,
+    &quot;organizations!inTrial&quot;,
+    &quot;userLabel1&quot;,
+    &quot;userLabel2&quot;,
+    &quot;organizations!hasPaymentInfo&quot;,
+    &quot;userLabel3&quot;,
+    &quot;userLabel4&quot;,
+    &quot;hasPassword&quot;,
+    &quot;userLabel5&quot;,
+    &quot;organizations!passwordValidDuration&quot;,
+    &quot;organizations!orgNumber&quot;,
+    &quot;organizations!resellerUri&quot;,
+    &quot;organizations!id&quot;,
+    &quot;disabled&quot;,
+    &quot;organizations!email&quot;,
+    &quot;id&quot;,
+    &quot;organizations!prohibitPasswordReuse&quot;,
+    &quot;organizations!defaultSyncGroup&quot;,
+    &quot;email&quot;,
+    &quot;organizations!originatingNumber&quot;,
+    &quot;organizations!validUntil&quot;,
+    &quot;created&quot;,
+    &quot;--ignore--&quot;,
+    &quot;nextPasswordExpiresReminder&quot;,
+    &quot;organizations!autoMuteSeconds&quot;,
+    &quot;organizationUri&quot;,
+    &quot;organizations!autoMuteWarningSeconds&quot;,
+    &quot;uri&quot;,
+    &quot;organizations!created&quot;,
+    &quot;organizations!label&quot;,
+    &quot;passwordExpires&quot;,
+    &quot;firstName&quot;,
+    &quot;organizations!name&quot;,
+    &quot;deleted&quot;,
+    &quot;organizations!phone&quot;,
+    &quot;organizations!uri&quot;,
+    &quot;organizations!numExpirationWarnings&quot;,
+    &quot;organizations!pendingCustomer&quot;,
+    &quot;organizations!expirationWarningInterval&quot;,
+    &quot;initialMute&quot;,
+    &quot;organizations!currency&quot;
+]
+}</code></pre>
+<p>Above are all the valid fields for the user resource. Fields prefixed with <code>organizations!</code> are fields belonging to the user's organization, and none of those are returned by default. To specify what fields to include in the response, use the <code>field</code> <a href="#matrix-parameters">matrix parameter</a></p>
+<h2 id="matrix-parameters">Matrix parameters</h2>
+<p>Matrix parameters are parameters that may be applied to a path segment in the URL, as opposed to query parameters, which applies to the whole URL. They are typically used to filter/influence the result of a <code>GET</code> request. Some examples:</p>
+<dl>
+<dt><code>/organizations;like-name=Foo%25/users/</code></dt>
+<dd>Get all users from organizations where the name field begins with <code>'Foo'</code>
+</dd>
+</dl>
+<h3 id="common-matrix-parameters-for-collections">Common matrix parameters for Collections</h3>
+<p>The following matrix parameters can be used on any collection resource URL:</p>
+<dl>
+<dt><code>;like-&lt;fieldlist&gt;=&lt;expr&gt;</code></dt>
+<dd><p>Only return resources where any of the fields matches <code>expr</code>. <code>expr</code> may contain the following wildcards:</p>
+<ul>
+<li><code>_</code> - Matches any character</li>
+<li><code>%</code> - Matches 0 to many characters</li>
+</ul>
+<p>Only works for string fields.</p>
+</dd>
+<dt><code>;where-&lt;fieldlist&gt;=&lt;literal&gt;</code></dt>
+<dd><p>Only return resources where any of the fields has the value <code>literal</code>.</p>
+<p>Works on any type of field.</p>
+</dd>
+<dt><code>;from-&lt;fieldlist&gt;=&lt;literal&gt;</code></dt>
+<dd><p>Only return resources where any of the fields has a value greater than or equal to <code>literal</code></p>
+<p>Only works on numerical and date fields.</p>
+</dd>
+<dt><code>;to-&lt;fieldlist&gt;=&lt;literal&gt;</code></dt>
+<dd><p>Only return resources where any of the fields has a value less than or equal to <code>literal</code></p>
+<p>Only works on numerical and date fields.</p>
+</dd>
+<dt><code>;order-by=&lt;field&gt;&lt;(order)?&gt;</code></dt>
+<dd>Order the result by <code>field</code>. <code>order</code> is optional, and is either <code>ASC</code> (default) or <code>DESC</code>. Use multiple <code>order-by</code> parameters to sort on multiple fields.
+</dd>
+</dl>
+<p><code>fieldlist</code> in the parameter names above is a comma separated list of fields. Using a list of field names here means resources where <em>any</em> of the fields match will be returned. On the other hand, if multiple parameters are used, they must all match for the resource to be returned.</p>
+<dl>
+<dt><code>organizations/users;like-firstName,lastName=%john%</code></dt>
+<dd>Users where either firstName <em>or</em> lastName contains <code>john</code> are returned.
+</dd>
+<dt><code>organizations/users;like-firstName=%john%;like-lastName=%doe%</code></dt>
+<dd>Users where firstName contains <code>john</code> <em>and</em> lastName contains <code>doe</code> are returned.
+</dd>
+</dl>
+<p>More complex filters, like &quot;return all users where firstName is <code>John</code> <em>or</em> lastName is <code>Doe</code>&quot; can not be expressed, unfortunately.</p>
+</body>
+</html>

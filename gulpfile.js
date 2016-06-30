@@ -1,9 +1,10 @@
 'use strict';
 
 var gulp = require('gulp');
+var del = require('del');
 var path = require('path');
 var es = require('event-stream');
-var clean = require('gulp-clean');
+//var clean = require('gulp-clean');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
@@ -20,6 +21,7 @@ var brass = require('gulp-brass');
 var npm = require('gulp-brass-npm');
 var pkg = require('./package.json');
 var runSequence = require('run-sequence');
+var pandoc = require('gulp-pandoc');
 
 var banner = ['/**',
   ' * <%= pkg.name %> - <%= pkg.description %>',
@@ -37,10 +39,7 @@ var rpm = brass.create(options);
  * Clean ups ./dist folder
  */
 gulp.task('clean', function() {
-  return gulp
-    .src('./dist', {read: false})
-    .pipe(clean({force: true}))
-    .on('error', log);
+  return del(['./dist/api-info/**', './dist/**']);
 });
 
 /**
@@ -55,7 +54,7 @@ gulp.task('lint', function () {
 /**
  * Build a distribution
  */
-gulp.task('dist', ['clean', 'lint'], _dist);
+gulp.task('dist', ['clean', 'docs', 'lint'], _dist);
 function _dist() {
   return es.merge(
     gulp.src([
@@ -84,7 +83,7 @@ function _dist() {
     .pipe(gulp.dest('./dist'))
     .pipe(connect.reload());
 }
-gulp.task('dev-dist', ['lint', 'dev-copy'], _dist);
+gulp.task('dev-dist', ['docs', 'lint', 'dev-copy'], _dist);
 
 /**
  * Processes less files into CSS files
@@ -129,6 +128,19 @@ function _copy() {
     .on('error', log);
 }
 gulp.task('dev-copy', ['dev-less', 'copy-local-specs'], _copy);
+
+gulp.task('docs', ['clean'], function() {
+  gulp.src('src/api-info/*.md')
+    .pipe(pandoc({
+      from: 'markdown',
+      to: 'html5',
+      ext: '.html',
+      args: ['--smart', '--css', 'style.css']
+    }))
+    .pipe(gulp.dest('./dist/api-info/'));
+  gulp.src(['src/api-info/*.css', 'src/api-info/*.png'])
+    .pipe(gulp.dest('./dist/api-info/'));
+});
 
 gulp.task('copy-local-specs', function () {
   // copy the test specs
@@ -184,7 +196,8 @@ gulp.task('watch', ['copy-local-specs'], function() {
 gulp.task('connect', function() {
   connect.server({
     root: 'dist',
-    livereload: true
+    livereload: true,
+    port: 8081
   });
 });
 
