@@ -23,6 +23,7 @@ var clean = require('gulp-clean')
 var pkg = require('./package.json');
 var runSequence = require('run-sequence');
 var pandoc = require('gulp-pandoc');
+var debug = require('gulp-debug');
 var del = require('del')
 
 var banner = ['/**',
@@ -62,7 +63,8 @@ function _dist() {
     gulp.src([
         './src/main/javascript/**/*.js',
         './node_modules/swagger-client/browser/swagger-client.js'
-      ]),
+      ])
+      .pipe(concat('scripts.js')),
       gulp
         .src(['./src/main/template/**/*'])
         .pipe(handlebars())
@@ -72,8 +74,9 @@ function _dist() {
           noRedeclare: true, // Avoid duplicate declarations
         }))
         .on('error', log)
+        .pipe(concat('templates.js'))
     )
-    .pipe(order(['scripts.js', 'templates.js']))
+    .pipe(order(['templates.js', 'scripts.js']))
     .pipe(concat('swagger-ui.js'))
     .pipe(wrap('(function(){<%= contents %>}).call(this);'))
     .pipe(header(banner, { pkg: pkg }))
