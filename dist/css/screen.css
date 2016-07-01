@@ -1487,3 +1487,11 @@
   outline-color: #cc0000;
   background-color: #f2dede;
 }
+.swagger-section dd {
+  padding-left: 1cm;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+.swagger-section code {
+  font-family: monospace;
+}
