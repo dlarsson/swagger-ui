@@ -319,10 +319,7 @@ Relation resources are a special kind of collection resources, and represents a
 relation between a resource and a set of other resources. An example is the
 roles associated with a user category.
 
-**NOTE**: `access-groups` in the URL below will be replaced with `user-categories`
-in the next release of the GroupTalk admin API!
-
-    $ curl -v -HAccept:application/json 'http://42:<apikey>@admin.grouptalk.com/api/organizations/access-groups/22/roles/' | aeson-pretty
+    $ curl -v -HAccept:application/json 'http://42:<apikey>@admin.grouptalk.com/api/organizations/user-categories/22/roles/' | aeson-pretty
     ...
     < HTTP/1.1 200 OK
     < X-Collection-Limit: 25
@@ -396,6 +393,9 @@ Collection resources may support the following HTTP methods:
 `PUT`
 :   Replace the collection with the given list of resources
 
+`PATCH`
+:   Add/remove items from the collection
+
 ## Matrix parameters
 
 Matrix parameters are parameters that may be applied to a path segment in the
@@ -454,3 +454,17 @@ all match for the resource to be returned.
 
 More complex filters, like "return all users where firstName is `John` *or*
 lastName is `Doe`" can not be expressed, unfortunately.
+
+### Content types
+
+The API can deliver responses in a few different formats. The standard HTTP way
+of asking for a specific content type is by setting the `Accept` request
+header to the appropriate MIME type. Every resource supports JSON
+(`application/json`), but collection resources additionally support CSV
+(`text/csv`) and an Excel format (.xlsx,
+`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`). As a
+convenience, it is also possible to add an extension to the URL, to request a
+specific format. Adding `.json` to the end of the URL (before the query
+parameters, and any matrix parameters on the last segment, like `/api/organizations/42/users.json;field=firstName;field=lastName`) has the same
+effect as setting the `Accept` header to `application/json`. For CSV the
+extension is `.csv` and for Excel `.xlsx`.
