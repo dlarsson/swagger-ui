@@ -553,14 +553,30 @@ SwaggerUi.partials.signature = (function () {
     modelsToIgnore[value.name] = value;
 
     // Response support
-    if (value.examples && _.isPlainObject(value.examples) && value.examples['application/json']) {
-      value.definition.example = value.examples['application/json'];
+    if (value.examples && _.isPlainObject(value.examples)) {
+      value = _.cloneDeep(value);
+      var keys = Object.keys(value.examples);
 
-      if (_.isString(value.definition.example)) {
-        value.definition.example = jsyaml.safeLoad(value.definition.example);
+      _.forEach(keys, function(key) {
+        if(key.indexOf('application/json') === 0) {
+          var example = value.examples[key];
+          if (_.isString(example)) {
+            example = jsyaml.safeLoad(example);
+          }
+          value.definition.example = example;
+          return schemaToJSON(value.definition, example, modelsToIgnore, value.modelPropertyMacro);
+        }
+      });
+    }
+
+    if (value.examples) {
+      value = _.cloneDeep(value);
+      var example = value.examples;
+      if (_.isString(example)) {
+        example = jsyaml.safeLoad(example);
       }
-    } else if (!value.definition.example) {
-      value.definition.example = value.examples;
+      value.definition.example = example;
+      return schemaToJSON(value.definition, example, modelsToIgnore, value.modelPropertyMacro);
     }
 
     return schemaToJSON(value.definition, value.models, modelsToIgnore, value.modelPropertyMacro);
@@ -842,8 +858,8 @@ SwaggerUi.partials.signature = (function () {
     return wrapTag(name, serializedProperties, attrs);
   }
 
-  function getInfiniteLoopMessage (name) {
-    return '<!-- Infinite loop $ref:' + name + ' -->';
+  function getInfiniteLoopMessage (name, loopTo) {
+    return wrapTag(name, '<!-- Infinite loop $ref:' + loopTo + ' -->');
   }
 
   function getErrorMessage (details) {
@@ -869,12 +885,12 @@ SwaggerUi.partials.signature = (function () {
       case 'object':
         output = createObjectXML(descriptor); break;
       case 'loop':
-        output = getInfiniteLoopMessage(descriptor.name); break;
+        output = getInfiniteLoopMessage(descriptor.name, descriptor.config.loopTo); break;
       default:
         output = createPrimitiveXML(descriptor);
     }
 
-    if ($ref) {
+    if ($ref && descriptor.type !== 'loop') {
       index = config.modelsToIgnore.indexOf($ref);
       if (index > -1) {
         config.modelsToIgnore.splice(index, 1);
@@ -905,7 +921,7 @@ SwaggerUi.partials.signature = (function () {
 
     if (config.modelsToIgnore.indexOf($ref) > -1) {
       type = 'loop';
-      name = modelType;
+      config.loopTo = modelType;
     } else {
       config.modelsToIgnore.push($ref);
     }

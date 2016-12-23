@@ -265,8 +265,7 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
 ]</code></pre>
 <h3 id="relation-resources">Relation resources</h3>
 <p>Relation resources are a special kind of collection resources, and represents a relation between a resource and a set of other resources. An example is the roles associated with a user category.</p>
-<p><strong>NOTE</strong>: <code>access-groups</code> in the URL below will be replaced with <code>user-categories</code> in the next release of the GroupTalk admin API!</p>
-<pre><code>$ curl -v -HAccept:application/json &#39;http://42:&lt;apikey&gt;@admin.grouptalk.com/api/organizations/access-groups/22/roles/&#39; | aeson-pretty
+<pre><code>$ curl -v -HAccept:application/json &#39;http://42:&lt;apikey&gt;@admin.grouptalk.com/api/organizations/user-categories/22/roles/&#39; | aeson-pretty
 ...
 &lt; HTTP/1.1 200 OK
 &lt; X-Collection-Limit: 25
@@ -329,6 +328,9 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
 <dt><code>PUT</code></dt>
 <dd>Replace the collection with the given list of resources
 </dd>
+<dt><code>PATCH</code></dt>
+<dd>Add/remove items from the collection
+</dd>
 </dl>
 <h2 id="matrix-parameters">Matrix parameters</h2>
 <p>Matrix parameters are parameters that may be applied to a path segment in the URL, as opposed to query parameters, which applies to the whole URL. They are typically used to filter/influence the result of a <code>GET</code> request. Some examples:</p>
@@ -374,5 +376,7 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
 </dd>
 </dl>
 <p>More complex filters, like “return all users where firstName is <code>John</code> <em>or</em> lastName is <code>Doe</code>” can not be expressed, unfortunately.</p>
+<h3 id="content-types">Content types</h3>
+<p>The API can deliver responses in a few different formats. The standard HTTP way of asking for a specific content type is by setting the <code>Accept</code> request header to the appropriate MIME type. Every resource supports JSON (<code>application/json</code>), but collection resources additionally support CSV (<code>text/csv</code>) and an Excel format (.xlsx, <code>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</code>). As a convenience, it is also possible to add an extension to the URL, to request a specific format. Adding <code>.json</code> to the end of the URL (before the query parameters, and any matrix parameters on the last segment, like <code>/api/organizations/42/users.json;field=firstName;field=lastName</code>) has the same effect as setting the <code>Accept</code> header to <code>application/json</code>. For CSV the extension is <code>.csv</code> and for Excel <code>.xlsx</code>.</p>
 </body>
 </html>

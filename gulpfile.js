@@ -1,17 +1,13 @@
 'use strict';
 
 var gulp = require('gulp');
-var del = require('del');
-var path = require('path');
 var es = require('event-stream');
-//var clean = require('gulp-clean');
+var clean = require('gulp-clean');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var less = require('gulp-less');
-var handlebars = require('gulp-handlebars');
 var wrap = require('gulp-wrap');
-var declare = require('gulp-declare');
 var watch = require('gulp-watch');
 var connect = require('gulp-connect');
 var header = require('gulp-header');
@@ -19,12 +15,13 @@ var order = require('gulp-order');
 var jshint = require('gulp-jshint');
 var brass = require('gulp-brass');
 var npm = require('gulp-brass-npm');
-var clean = require('gulp-clean')
-var pkg = require('./package.json');
-var runSequence = require('run-sequence');
 var pandoc = require('gulp-pandoc');
 var debug = require('gulp-debug');
-var del = require('del')
+var runSequence = require('run-sequence');
+var cssnano = require('gulp-cssnano');
+var pkg = require('./package.json');
+var sourcemaps = require('gulp-sourcemaps');
+
 
 var banner = ['/**',
   ' * <%= pkg.name %> - <%= pkg.description %>',
@@ -42,7 +39,11 @@ var rpm = brass.create(options);
  * Clean ups ./dist folder
  */
 gulp.task('clean', function() {
-  return del(['./dist/api-info/**', './dist/**']);
+  return gulp
+    .src('./dist', {read: false})
+    .pipe(clean({force: true}))
+    .on('error', log);
+//  return del(['./dist/api-info/**', './dist/**']);
 });
 
 /**
@@ -61,25 +62,21 @@ gulp.task('dist', ['clean', 'lint'], _dist);
 function _dist() {
   return es.merge(
     gulp.src([
+        './node_modules/es5-shim/es5-shim.js',
+        './lib/sanitize-html.min.js',
         './src/main/javascript/**/*.js',
         './node_modules/swagger-client/browser/swagger-client.js'
-      ])
-      .pipe(concat('scripts.js')),
+      ]),
       gulp
-        .src(['./src/main/template/**/*'])
-        .pipe(handlebars())
-        .pipe(wrap('Handlebars.template(<%= contents %>)'))
-        .pipe(declare({
-          namespace: 'Handlebars.templates',
-          noRedeclare: true, // Avoid duplicate declarations
-        }))
+        .src(['./src/main/template/templates.js'])
         .on('error', log)
-        .pipe(concat('templates.js'))
     )
-    .pipe(order(['templates.js', 'scripts.js']))
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(order(['scripts.js', 'templates.js']))
     .pipe(concat('swagger-ui.js'))
     .pipe(wrap('(function(){<%= contents %>}).call(this);'))
     .pipe(header(banner, { pkg: pkg }))
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest('./dist'))
     .pipe(uglify())
     .on('error', log)
@@ -116,7 +113,9 @@ gulp.task('copy', ['less', 'docs'], _copy);
 function _copy() {
   // copy JavaScript files inside lib folder
   gulp
-    .src(['./lib/**/*.{js,map}'])
+    .src(['./lib/**/*.{js,map}',
+        './node_modules/es5-shim/es5-shim.js'
+    ])
     .pipe(gulp.dest('./dist/lib'))
     .on('error', log);
 
@@ -181,6 +180,23 @@ gulp.task('files', [ 'source' ], function () {
 gulp.task('spec', [ 'files' ], rpm.specTask());
 gulp.task('rpmbuild', [ 'spec' ], rpm.buildTask());
 
+gulp.task('minify-css', function() {
+    /** Minify all CSS within dist folder, runs after dist process*/
+
+    return gulp.src('./dist/css/*.css')
+        .pipe(cssnano())
+        .pipe(gulp.dest('./dist/css'));
+});
+
+gulp.task('uglify-libs', function() {
+    /**
+     * Minify all JS libs within the dist folder.  A nice TODO would be to use versions from CDN
+     */
+    gulp.src('./dist/lib/*.js')
+        .pipe(uglify())
+        .pipe(gulp.dest('./dist/lib'));
+});
+
 /**
  * Watch for changes and recompile
  */
@@ -210,7 +226,19 @@ function log(error) {
   console.error(error.toString && error.toString());
 }
 
-gulp.task('default', ['dist', 'copy']);
+gulp.task('handlebars', function () {
+    gulp
+        .src(['./src/main/template/templates.js'])
+        .pipe(wrap('/* jshint ignore:start */ \n {<%= contents %>} \n /* jshint ignore:end */'))
+        .pipe(gulp.dest('./src/main/template/'))
+        .on('error', log);
+});
+
+gulp.task('default', function(callback) {
+    runSequence(['dist', 'copy'],
+                ['uglify-libs', 'minify-css'],
+                callback);
+});
 gulp.task('serve', ['connect', 'watch']);
 gulp.task('dev', ['default'], function () {
   gulp.start('serve');
