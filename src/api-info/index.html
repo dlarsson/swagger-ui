@@ -29,7 +29,7 @@
 h='&#x67;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#46;&#x63;&#x6f;&#x6d;';a='&#64;';n='&#x73;&#x75;&#112;&#112;&#x6f;&#114;&#116;';e=n+a+h;
 document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x47;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#32;&#x53;&#x75;&#112;&#112;&#x6f;&#114;&#116;'+'<\/'+'a'+'>');
 // -->
-</script><noscript>&#x47;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#32;&#x53;&#x75;&#112;&#112;&#x6f;&#114;&#116;&#32;&#40;&#x73;&#x75;&#112;&#112;&#x6f;&#114;&#116;&#32;&#x61;&#116;&#32;&#x67;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#32;&#100;&#x6f;&#116;&#32;&#x63;&#x6f;&#x6d;&#x29;</noscript> to get one. Secondly, you need to find out your organization's URL. This is easiest done by logging in to your <a href="https://admin.grouptalk.com/admin/">Grouptalk Web Admin account</a>, click the organization menu item (underneath your name in the menu to the left), and look at what the URL in the address bar says. It should say something like https://admin.grouptalk.com/admin/#/organizations/42/. That last number is the Grouptalk identity number for your organization, and the API url for your organization is <a href="https://admin.group.com/api/organizations/42/" class="uri">https://admin.group.com/api/organizations/42/</a> (with '42' replaced with whatever your organization's identity number is).</p>
+</script><noscript>&#x47;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#32;&#x53;&#x75;&#112;&#112;&#x6f;&#114;&#116;&#32;&#40;&#x73;&#x75;&#112;&#112;&#x6f;&#114;&#116;&#32;&#x61;&#116;&#32;&#x67;&#114;&#x6f;&#x75;&#112;&#116;&#x61;&#108;&#x6b;&#32;&#100;&#x6f;&#116;&#32;&#x63;&#x6f;&#x6d;&#x29;</noscript> to get one. Secondly, you need to find out your organization's URL. This is easiest done by logging in to your <a href="https://admin.grouptalk.com/admin/">Grouptalk Web Admin account</a>, click the organization menu item (underneath your name in the menu to the left), and look at what the URL in the address bar says. It should say something like https://admin.grouptalk.com/admin/#/resellers/organizations/42/. That last number is the Grouptalk identity number for your organization, and the API url for your organization is <a href="https://admin.group.com/api/resellers/organizations/42/" class="uri">https://admin.group.com/api/resellers/organizations/42/</a> (with '42' replaced with whatever your organization's identity number is).</p>
 <h2 id="trying-things-out">Trying things out</h2>
 <p>Now that you have an API key, and know your organization's identity number, you can start exploring the API. Type in the following URL in your web browser:</p>
 <pre><code>https://42:&lt;api-key&gt;@admin.grouptalk.com/api/authenticated-principal.json/</code></pre>
@@ -54,32 +54,32 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
         }
     ],
     &quot;displayName&quot;: &quot;Example&quot;,
-    &quot;organizationUri&quot;: &quot;/api/organizations/42/&quot;
+    &quot;organizationUri&quot;: &quot;/api/resellers/organizations/42/&quot;
 }</code></pre>
 <p>This URL returns information about the authenticated <em>principal</em>. Since an API key isn't associated with a particular user, <code>userUri</code> is null, and <code>displayName</code> contains the same as <code>organizationName</code>. More interestingly, there is an <code>organizationUri</code> field, with a URL to your organization. This URL is relative to the base URL, which is <a href="https://42:%3Capi-key" class="uri">https://42:&lt;api-key</a><span class="citation">@admin.grouptalk.com</span>&gt;. When following links, always resolve them against this base URL.</p>
 <p>Following the <code>organizationUri</code> link, we get the following result:</p>
-<pre><code>$ curl -v -HAccept:application/json https://42:&lt;api-key&gt;@admin.grouptalk.com/api/organizations/42/
+<pre><code>$ curl -v -HAccept:application/json https://42:&lt;api-key&gt;@admin.grouptalk.com/api/resellers/organizations/42/
 ...
 &lt; HTTP/1.1 200 OK
-&lt; Link: &lt;/api/organizations/42/user-categories/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/user-categories&quot;
-&lt; Link: &lt;/api/organizations/42/default-user-categories/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/default-user-categories&quot;
-&lt; Link: &lt;/api/organizations/42/default-ptt-group-categories/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/default-ptt-group-categories&quot;
-&lt; Link: &lt;/api/organizations/42/users/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/users&quot;
-&lt; Link: &lt;/api/organizations/42/ptt-groups/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/ptt-groups&quot;
-&lt; Link: &lt;/api/organizations/42/call-groups/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/call-groups&quot;
-&lt; Link: &lt;/api/organizations/42/queues/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/queues&quot;
-&lt; Link: &lt;/api/organizations/42/custom-actions/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/custom-actions&quot;
-&lt; Link: &lt;/api/organizations/42/custom-action-groups/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/custom-action-groups&quot;
-&lt; Link: &lt;/api/organizations/42/alarm-definitions/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/alarm-definitions&quot;
-&lt; Link: &lt;/api/organizations/42/links/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/links&quot;
-&lt; Link: &lt;/api/organizations/42/priceplan/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/priceplan&quot;
-&lt; Link: &lt;/api/organizations/42/licenses/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/licenses&quot;
-&lt; Link: &lt;/api/organizations/42/invoices/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/invoices&quot;
-&lt; Link: &lt;/api/organizations/42/become-customer&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/become-customer&quot;
-&lt; Link: &lt;/api/organizations/42/end-of-trial&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/endoftrial&quot;
-&lt; Link: &lt;/api/organizations/42/payment-methods&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/payment-methods&quot;
-&lt; Link: &lt;/api/organizations/42/activate&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/activate&quot;
-&lt; Link: &lt;/api/organizations/42/api-key/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/api-key&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/user-categories/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/user-categories&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/default-user-categories/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/default-user-categories&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/default-ptt-group-categories/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/default-ptt-group-categories&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/users/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/users&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/ptt-groups/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/ptt-groups&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/call-groups/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/call-groups&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/queues/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/queues&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/custom-actions/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/custom-actions&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/custom-action-groups/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/custom-action-groups&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/alarm-definitions/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/alarm-definitions&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/links/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/links&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/priceplan/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/priceplan&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/licenses/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/licenses&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/invoices/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/invoices&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/become-customer&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/become-customer&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/end-of-trial&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/endoftrial&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/payment-methods&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/payment-methods&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/activate&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/activate&quot;
+&lt; Link: &lt;/api/resellers/organizations/42/api-key/&gt;; rel=&quot;http://www.grouptalk.com/linktypes/organization/api-key&quot;
 &lt; Content-Type: application/json
 &lt; Date: Tue, 28 Jun 2016 12:20:04 GMT
 &lt; Content-Length: 1127
@@ -96,7 +96,7 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
     &quot;inTrial&quot;: false,
     &quot;prohibitPasswordReuse&quot;: false,
     &quot;created&quot;: &quot;2013-02-15T13:03:08.000+0000&quot;,
-    &quot;uri&quot;: &quot;/api/organizations/42/&quot;,
+    &quot;uri&quot;: &quot;/api/resellers/organizations/42/&quot;,
     &quot;hasPaymentInfo&quot;: false,
     &quot;expirationWarningInterval&quot;: null,
     &quot;validUntil&quot;: null,
@@ -105,7 +105,7 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
     &quot;currency&quot;: &quot;SEK&quot;,
     &quot;id&quot;: 42,
     &quot;autoMuteSeconds&quot;: 12,
-    &quot;resellerUri&quot;: &quot;/api/organizations/resellers/1/&quot;,
+    &quot;resellerUri&quot;: &quot;/api/resellers/1/&quot;,
     &quot;pendingCustomer&quot;: false,
     &quot;defaultSyncGroup&quot;: null,
     &quot;label&quot;: {
@@ -141,7 +141,7 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
 <p>Next comes the actual JSON data returned by this request.</p>
 <h3 id="collection-resources">Collection resources</h3>
 <p>The URL <code>/organizations/42/</code> refers to an <em>instance</em>. Other URLs refer to <em>collection</em> resources. Here's an example of the response from a <code>GET</code> on a collection resource:</p>
-<pre><code>$ curl -v -HAccept:application/json &#39;https://42:&lt;apikey&gt;@admin.grouptalk.com/api/organizations/42/users/&#39;
+<pre><code>$ curl -v -HAccept:application/json &#39;https://42:&lt;apikey&gt;@admin.grouptalk.com/api/resellers/organizations/42/users/&#39;
 ...
 &lt; HTTP/1.1 200 OK
 &lt; Server: GlassFish Server Open Source Edition  4.1.1
@@ -149,9 +149,9 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
 &lt; X-Collection-Limit: 25
 &lt; X-Collection-Offset: 0
 &lt; X-Collection-Total: 8
-&lt; Link: &lt;http://localhost:8080/api/organizations/42/users/?offset=0&amp;limit=25&gt;; rel=&quot;self&quot;
-&lt; Link: &lt;http://localhost:8080/api/organizations/42/users/?offset=0&amp;limit=25&gt;; rel=&quot;first&quot;
-&lt; Link: &lt;http://localhost:8080/api/organizations/42/users/?offset=0&amp;limit=25&gt;; rel=&quot;last&quot;
+&lt; Link: &lt;http://localhost:8080/api/resellers/organizations/42/users/?offset=0&amp;limit=25&gt;; rel=&quot;self&quot;
+&lt; Link: &lt;http://localhost:8080/api/resellers/organizations/42/users/?offset=0&amp;limit=25&gt;; rel=&quot;first&quot;
+&lt; Link: &lt;http://localhost:8080/api/resellers/organizations/42/users/?offset=0&amp;limit=25&gt;; rel=&quot;last&quot;
 &lt; Content-Type: application/json
 &lt; Date: Tue, 28 Jun 2016 13:05:27 GMT
 &lt; Content-Length: 3524
@@ -168,12 +168,12 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
         &quot;lastName&quot;: &quot;Doe&quot;,
         &quot;disabled&quot;: false,
         &quot;created&quot;: &quot;2013-02-15T13:03:08.000+0000&quot;,
-        &quot;uri&quot;: &quot;/api/organizations/users/15439/&quot;,
+        &quot;uri&quot;: &quot;/api/resellers/organizations/users/15439/&quot;,
         &quot;userLabel3&quot;: &quot;&quot;,
         &quot;userLabel5&quot;: &quot;&quot;,
         &quot;firstName&quot;: &quot;John&quot;,
         &quot;userLabel2&quot;: &quot;&quot;,
-        &quot;organizationUri&quot;: &quot;/api/organizations/42/&quot;,
+        &quot;organizationUri&quot;: &quot;/api/resellers/organizations/42/&quot;,
         &quot;id&quot;: 15439,
         &quot;deleted&quot;: null,
         &quot;userLabel4&quot;: &quot;&quot;,
@@ -187,7 +187,7 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+'&#x4
 <p>The <code>Link</code> headers link to other <em>pages</em> within the collection. Again, the <code>rel</code> attribute identifies the type of the link. Possible <code>rel</code> values here are <code>self</code> (the URL for this subcollection), <code>first</code> (the first <em>page</em> of the collection), <code>last</code>, <code>next</code> and <code>previous</code>.</p>
 <p>All collection resources have a <code>fields</code> subresource, which returns a JSON object with a single member <code>fields</code>, an array of all valid fields for that resource type. Some of these fields are default fields, while others have to be explicitly requested in order to be returned.</p>
 <p>Resources are typically hierarchically organized. At the root there are organizations, and underneath there are resources like users, PTT groups, user categories, queues, panic alarms, etc. When requesting a collection, or an instance of a subresource, you can optionally request for parent fields, as indicated by the list returned from <code>GET</code>-ing the <code>fields</code>subresource:</p>
-<pre><code>$ curl -v -HAccept:application/json &#39;https://42:&lt;apikey&gt;@admin.grouptalk.com/api/organizations/42/users/fields/&#39;
+<pre><code>$ curl -v -HAccept:application/json &#39;https://42:&lt;apikey&gt;@admin.grouptalk.com/api/resellers/organizations/42/users/fields/&#39;
 ...
 &lt; HTTP/1.1 200 OK
 &lt; Server: GlassFish Server Open Source Edition  4.1.1
