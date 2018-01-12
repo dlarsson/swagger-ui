@@ -325,9 +325,9 @@ roles associated with a user category.
     < X-Collection-Limit: 25
     < X-Collection-Offset: 0
     < X-Collection-Total: 1
-    < Link: <http://localhost:8080/api/organizations/access-groups/22/roles/?offset=0&limit=25>; rel="self"
-    < Link: <http://localhost:8080/api/organizations/access-groups/22/roles/?offset=0&limit=25>; rel="first"
-    < Link: <http://localhost:8080/api/organizations/access-groups/22/roles/?offset=0&limit=25>; rel="last"
+    < Link: <http://localhost:8080/api/organizations/user-categories/22/roles/?offset=0&limit=25>; rel="self"
+    < Link: <http://localhost:8080/api/organizations/user-categories/22/roles/?offset=0&limit=25>; rel="first"
+    < Link: <http://localhost:8080/api/organizations/user-categories/22/roles/?offset=0&limit=25>; rel="last"
     < Content-Type: application/json
     < Date: Thu, 30 Jun 2016 09:17:26 GMT
     < Content-Length: 173
@@ -337,21 +337,21 @@ roles associated with a user category.
     * Connection #0 to host localhost left intact
     [
         {
-            "uri": "/api/organizations/access-groups/22/roles/privatecall",
+            "uri": "/api/organizations/user-categories/22/roles/privatecall",
             "childUri": "/api/roles/privatecall",
             "name": "privatecall",
-            "parentUri": "/api/organizations/access-groups/22/"
+            "parentUri": "/api/organizations/user-categories/22/"
         },
         {
-            "uri": "/api/organizations/access-groups/22/roles/reader",
+            "uri": "/api/organizations/user-categories/22/roles/reader",
             "childUri": "/api/roles/reader",
             "name": "reader",
-            "parentUri": "/api/organizations/access-groups/22/"
+            "parentUri": "/api/organizations/user-categories/22/"
         },
         ...
     ]
 
-The role relation has it's own URL: `/api/organizations/access-groups/22/roles/reader`.
+The role relation has it's own URL: `/api/organizations/user-categories/22/roles/reader`.
 The returned data refers to the user category it belongs to in the `parentUri`
 field, and what role it represents through the `childUri` field.
 
@@ -360,7 +360,7 @@ To add a new role to the user category, we `POST`
  To remove this
 role you send a `DELETE` to the relation URL:
 
-    $ curl -v -XDELETE 'http://42:<apikey>@admin.grouptalk.com/api/organizations/access-groups/22/roles/reader'
+    $ curl -v -XDELETE 'http://42:<apikey>@admin.grouptalk.com/api/organizations/user-categories/22/roles/reader'
 
 ### Supported instance resource methods
 

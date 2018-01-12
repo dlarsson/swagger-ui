@@ -21,6 +21,7 @@ var runSequence = require('run-sequence');
 var cssnano = require('gulp-cssnano');
 var pkg = require('./package.json');
 var sourcemaps = require('gulp-sourcemaps');
+var path = require("path");
 
 
 var banner = ['/**',
